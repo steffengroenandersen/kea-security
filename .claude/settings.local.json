@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(if [ -d \"secure-app\" ])",
+      "Bash(then mv secure-app markindex)",
+      "Bash(fi)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

@@ -1,0 +1,61 @@
+# Caddyfile - Caddy Web Server Configuration
+#
+# Caddy features:
+# - Automatic HTTPS with Let's Encrypt
+# - Automatic certificate renewal
+# - HTTP to HTTPS redirect
+# - Security headers
+#
+# Replace 'yourdomain.com' with your actual domain
+
+yourdomain.com {
+    # Automatic HTTPS
+    # Caddy handles certificate acquisition and renewal from Let's Encrypt
+    # No configuration needed - it just works!
+
+    # Security Headers
+    header {
+        # HSTS: Force HTTPS for 1 year
+        # preload: eligible for browser HSTS preload lists
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+
+        # Prevent MIME type sniffing
+        X-Content-Type-Options "nosniff"
+
+        # Clickjacking protection
+        X-Frame-Options "DENY"
+
+        # XSS protection for legacy browsers
+        X-XSS-Protection "1; mode=block"
+
+        # Referrer policy (privacy)
+        Referrer-Policy "strict-origin-when-cross-origin"
+
+        # Remove server version (information disclosure prevention)
+        -Server
+    }
+
+    # Reverse proxy to Next.js application
+    reverse_proxy localhost:3000 {
+        # Forward real client IP
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-For {remote_host}
+        header_up X-Forwarded-Proto {scheme}
+    }
+
+    # Logging (for security monitoring)
+    log {
+        output file /var/log/caddy/access.log {
+            roll_size 10mb
+            roll_keep 10
+        }
+    }
+}
+
+# Redirect www to non-www (optional)
+www.yourdomain.com {
+    redir https://yourdomain.com{uri} permanent
+}
+
+# HTTP to HTTPS redirect is automatic
+# Caddy handles this without configuration

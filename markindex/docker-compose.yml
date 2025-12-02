@@ -1,0 +1,66 @@
+# Docker Compose Configuration
+#
+# Services:
+# - db: PostgreSQL database
+# - app: Next.js application
+#
+# Security features:
+# - Isolated network (containers can't access host directly)
+# - Database not exposed to internet
+# - Environment variables for secrets
+# - Persistent volumes for data
+
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:15-alpine
+    container_name: markindex-db
+    environment:
+      POSTGRES_USER: appuser
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: markindex
+    volumes:
+      # Persistent data storage
+      - pgdata:/var/lib/postgresql/data
+      # Initialize database schema on first run
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    restart: unless-stopped
+    networks:
+      - app-network
+    # Database is NOT exposed to host (only accessible from app container)
+    # This is intentional for security
+
+  # Next.js Application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: markindex-app
+    environment:
+      # Database connection (internal Docker network)
+      DATABASE_URL: postgresql://appuser:${DB_PASSWORD}@db:5432/markindex
+      NODE_ENV: production
+      SESSION_SECRET: ${SESSION_SECRET}
+    depends_on:
+      - db
+    restart: unless-stopped
+    networks:
+      - app-network
+    ports:
+      # Expose port 3000 to host (Caddy will reverse proxy to this)
+      - "3000:3000"
+    volumes:
+      # Mount uploads directory (for profile pictures)
+      - ./public/uploads:/app/public/uploads
+
+# Named volumes for persistent data
+volumes:
+  pgdata:
+    driver: local
+
+# Private network for containers
+networks:
+  app-network:
+    driver: bridge
