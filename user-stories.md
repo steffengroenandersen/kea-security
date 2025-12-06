@@ -9,7 +9,7 @@
 | US003 | Session Management                        | ✅ DONE |
 | US004 | Create Business                           | ✅ DONE |
 | US005 | Assign Users to Business                  | ✅ DONE |
-| US006 | Upload Business Logo                      | 📋 TODO |
+| US006 | Upload Business Logo                      | ✅ DONE |
 | US007 | Create Portfolio                          | ✅ DONE |
 | US008 | Toggle Portfolio Visibility               | ✅ DONE |
 | US009 | View All Portfolios (Admin)               | ✅ DONE |
