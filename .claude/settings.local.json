@@ -6,7 +6,19 @@
       "Bash(git push:*)",
       "Bash(if [ -d \"secure-app\" ])",
       "Bash(then mv secure-app markindex)",
-      "Bash(fi)"
+      "Bash(fi)",
+      "Bash(tree:*)",
+      "Bash(npm run dev:*)",
+      "Bash(docker exec:*)",
+      "Bash(npx drizzle-kit studio:*)",
+      "Bash(npm run db:studio:*)",
+      "Bash(psql:*)",
+      "Bash(docker-compose restart:*)",
+      "Bash(docker-compose up:*)",
+      "Bash(docker-compose down:*)",
+      "Bash(npx drizzle-kit:*)",
+      "Bash(cat:*)",
+      "WebFetch(domain:thecopenhagenbook.com)"
     ],
     "deny": [],
     "ask": []

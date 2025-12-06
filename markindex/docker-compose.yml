@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: markindex
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: markindex
+    ports:
+      - "5432:5432"
+    volumes:
+      - markindex:/var/lib/postgresql/data
+
+volumes:
+  markindex:
