@@ -508,3 +508,108 @@ export async function getPortfolioComments(portfolioId: number) {
 
   return comments;
 }
+
+/**
+ * Validate image file signature (magic bytes) to prevent file type confusion attacks
+ * Checks actual file content, not just MIME type or extension
+ * @param file - File to validate
+ * @returns true if file is a valid PNG or JPEG, false otherwise
+ */
+async function validateImageSignature(file: File): Promise<boolean> {
+  const buffer = await file.arrayBuffer();
+  const bytes = new Uint8Array(buffer.slice(0, 12));
+
+  // PNG signature: 89 50 4E 47 0D 0A 1A 0A
+  const isPng =
+    bytes[0] === 0x89 &&
+    bytes[1] === 0x50 &&
+    bytes[2] === 0x4e &&
+    bytes[3] === 0x47 &&
+    bytes[4] === 0x0d &&
+    bytes[5] === 0x0a &&
+    bytes[6] === 0x1a &&
+    bytes[7] === 0x0a;
+
+  // JPEG signature: FF D8 FF
+  const isJpeg = bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff;
+
+  return isPng || isJpeg;
+}
+
+/**
+ * Upload business logo action (US006)
+ * Allows business admins to upload a logo (PNG/JPG only)
+ * Validates file signature, size, and MIME type for security
+ * Stores as base64 data URL in database
+ */
+export async function uploadBusinessLogo(
+  formData: FormData,
+  businessUuid: string
+) {
+  try {
+    // 1. Authenticate
+    const token = await getSessionToken();
+    if (!token) {
+      return { error: "Unauthorized" };
+    }
+
+    const { user: currentUser } = await validateSessionToken(token);
+    if (!currentUser) {
+      return { error: "Unauthorized" };
+    }
+
+    // 2. Authorize - verify current user is admin of this business
+    const businessAccess = await getUserBusinessAccess(
+      currentUser.userId,
+      businessUuid
+    );
+    if (!businessAccess || businessAccess.role !== "admin") {
+      return { error: "Something went wrong" };
+    }
+
+    // 3. Extract and validate file exists
+    const file = formData.get("logo") as File | null;
+    if (!file || !(file instanceof File)) {
+      return { error: "Something went wrong" };
+    }
+
+    // 4. Validate file size (max 5MB, min > 0)
+    const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+    if (file.size > MAX_FILE_SIZE || file.size === 0) {
+      return { error: "Something went wrong" };
+    }
+
+    // 5. Validate MIME type
+    const allowedMimeTypes = ["image/png", "image/jpeg", "image/jpg"];
+    if (!allowedMimeTypes.includes(file.type)) {
+      return { error: "Something went wrong" };
+    }
+
+    // 6. Validate file signature (magic bytes) - CRITICAL SECURITY
+    const isValidImage = await validateImageSignature(file);
+    if (!isValidImage) {
+      return { error: "Something went wrong" };
+    }
+
+    // 7. Convert to base64 data URL
+    const arrayBuffer = await file.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+    const base64 = buffer.toString("base64");
+    const dataUrl = `data:${file.type};base64,${base64}`;
+
+    // 8. Update database
+    await db
+      .update(business)
+      .set({ logoUrl: dataUrl })
+      .where(eq(business.businessUuid, businessUuid));
+
+    // 9. Revalidate to show updated logo
+    revalidatePath(`/app/${businessUuid}`);
+    return { success: true };
+  } catch (error) {
+    if (error instanceof Error && error.message === "NEXT_REDIRECT") {
+      throw error;
+    }
+    return { error: "Something went wrong" };
+  }
+}

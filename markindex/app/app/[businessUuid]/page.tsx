@@ -15,6 +15,7 @@ import { AssignUserForm } from "@/components/business/AssignUserForm";
 import { BusinessUsersList } from "@/components/business/BusinessUsersList";
 import { CreatePortfolioForm } from "@/components/business/CreatePortfolioForm";
 import { PortfoliosList } from "@/components/business/PortfoliosList";
+import { LogoUploadForm } from "@/components/business/LogoUploadForm";
 
 interface BusinessPageProps {
   params: Promise<{
@@ -100,6 +101,14 @@ export default async function BusinessPage({ params }: BusinessPageProps) {
           {/* Show portfolio creation form only to admins */}
           {isAdmin && <CreatePortfolioForm businessUuid={businessUuid} />}
 
+          {/* Show logo upload form only to admins */}
+          {isAdmin && (
+            <LogoUploadForm
+              businessUuid={businessUuid}
+              currentLogoUrl={businessAccess.logoUrl}
+            />
+          )}
+
           {/* Show portfolios to everyone */}
           <PortfoliosList portfolios={portfolios} isAdmin={isAdmin} businessUuid={businessUuid} />
 
@@ -120,7 +129,6 @@ export default async function BusinessPage({ params }: BusinessPageProps) {
             <CardContent>
               <ul className="list-disc list-inside space-y-1 text-zinc-600 dark:text-zinc-400">
                 <li>Toggle portfolio visibility (US008)</li>
-                <li>Logo upload (US006)</li>
                 <li>Comments on portfolios (US012, US013)</li>
               </ul>
             </CardContent>
