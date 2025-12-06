@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { randomUUID } from "crypto";
 import { db } from "@/lib/db";
-import { business, userBusiness, user } from "@/lib/db/schema";
+import { business, userBusiness, user, portfolio } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
 import { getSessionToken, validateSessionToken } from "@/lib/auth";
 import { getUserBusinessAccess } from "@/lib/auth/business";
@@ -203,4 +203,104 @@ export async function assignUserToBusiness(
     // Return generic error for all other failures
     return { error: "Something went wrong" };
   }
+}
+
+// Portfolio creation validation schema
+const createPortfolioSchema = z.object({
+  title: z
+    .string()
+    .min(1, "Portfolio title is required")
+    .max(100, "Portfolio title must be less than 100 characters")
+    .trim(),
+});
+
+/**
+ * Create portfolio action - creates a new portfolio for a business
+ * Only business admins can create portfolios
+ * Portfolios are set to hidden by default
+ */
+export async function createPortfolio(
+  formData: FormData,
+  businessUuid: string
+) {
+  try {
+    // 1. Authenticate
+    const token = await getSessionToken();
+    if (!token) {
+      return { error: "Unauthorized" };
+    }
+
+    const { user: currentUser } = await validateSessionToken(token);
+    if (!currentUser) {
+      return { error: "Unauthorized" };
+    }
+
+    // 2. Validate input
+    const rawData = {
+      title: formData.get("title"),
+    };
+
+    const result = createPortfolioSchema.safeParse(rawData);
+    if (!result.success) {
+      return { error: "Invalid portfolio title" };
+    }
+
+    const { title } = result.data;
+
+    // 3. Authorize - verify current user is admin of this business
+    const businessAccess = await getUserBusinessAccess(
+      currentUser.userId,
+      businessUuid
+    );
+    if (!businessAccess) {
+      return { error: "Something went wrong" };
+    }
+
+    if (businessAccess.role !== "admin") {
+      return { error: "Something went wrong" };
+    }
+
+    // 4. Generate UUIDs
+    const portfolioUuid = randomUUID();
+    const portfolioPublicUuid = randomUUID();
+
+    // 5. Create portfolio (hidden by default per US007)
+    await db.insert(portfolio).values({
+      portfolioUuid,
+      portfolioPublicUuid,
+      businessId: businessAccess.businessId,
+      title,
+      visibility: "hidden", // Hidden by default per US007
+    });
+
+    // 6. Revalidate the page to show updated portfolio list
+    revalidatePath(`/app/${businessUuid}`);
+    return { success: true };
+  } catch (error) {
+    // Catch redirect errors and rethrow them
+    if (error instanceof Error && error.message === "NEXT_REDIRECT") {
+      throw error;
+    }
+    // Return generic error for all other failures
+    return { error: "Something went wrong" };
+  }
+}
+
+/**
+ * Get all portfolios for a business
+ */
+export async function getBusinessPortfolios(businessId: number) {
+  const portfolios = await db
+    .select({
+      portfolioId: portfolio.portfolioId,
+      portfolioUuid: portfolio.portfolioUuid,
+      portfolioPublicUuid: portfolio.portfolioPublicUuid,
+      title: portfolio.title,
+      visibility: portfolio.visibility,
+    })
+    .from(portfolio)
+    .where(eq(portfolio.businessId, businessId))
+    .orderBy(portfolio.title);
+
+  return portfolios;
 }

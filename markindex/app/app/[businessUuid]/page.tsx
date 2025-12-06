@@ -1,6 +1,7 @@
 import { redirect, notFound } from "next/navigation";
 import { getSessionToken, validateSessionToken } from "@/lib/auth";
 import { getUserBusinessAccess, getBusinessUsers } from "@/lib/auth/business";
+import { getBusinessPortfolios } from "@/lib/actions/business";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -12,6 +13,8 @@ import {
 import Link from "next/link";
 import { AssignUserForm } from "@/components/business/AssignUserForm";
 import { BusinessUsersList } from "@/components/business/BusinessUsersList";
+import { CreatePortfolioForm } from "@/components/business/CreatePortfolioForm";
+import { PortfoliosList } from "@/components/business/PortfoliosList";
 
 interface BusinessPageProps {
   params: Promise<{
@@ -45,9 +48,16 @@ export default async function BusinessPage({ params }: BusinessPageProps) {
     notFound(); // Shows 404 instead of revealing existence
   }
 
-  // 3. Fetch business users
+  // 3. Fetch business users and portfolios
   const users = await getBusinessUsers(businessAccess.businessId);
+  const allPortfolios = await getBusinessPortfolios(businessAccess.businessId);
   const isAdmin = businessAccess.role === "admin";
+
+  // 4. Filter portfolios based on user role
+  // Admins see all portfolios, members only see visible ones
+  const portfolios = isAdmin
+    ? allPortfolios
+    : allPortfolios.filter((p) => p.visibility === "visible");
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-zinc-50 to-zinc-100 dark:from-zinc-950 dark:to-black p-4">
@@ -87,6 +97,12 @@ export default async function BusinessPage({ params }: BusinessPageProps) {
 
         {/* Content Area */}
         <div className="space-y-6">
+          {/* Show portfolio creation form only to admins */}
+          {isAdmin && <CreatePortfolioForm businessUuid={businessUuid} />}
+
+          {/* Show portfolios to everyone */}
+          <PortfoliosList portfolios={portfolios} isAdmin={isAdmin} businessUuid={businessUuid} />
+
           {/* Show assign form only to admins */}
           {isAdmin && <AssignUserForm businessUuid={businessUuid} />}
 
@@ -103,7 +119,7 @@ export default async function BusinessPage({ params }: BusinessPageProps) {
             </CardHeader>
             <CardContent>
               <ul className="list-disc list-inside space-y-1 text-zinc-600 dark:text-zinc-400">
-                <li>Portfolio management (US007, US008, US009, US010)</li>
+                <li>Toggle portfolio visibility (US008)</li>
                 <li>Logo upload (US006)</li>
                 <li>Comments on portfolios (US012, US013)</li>
               </ul>

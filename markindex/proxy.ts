@@ -5,11 +5,11 @@ import type { NextRequest } from "next/server";
 const PUBLIC_ROUTES = ["/", "/login", "/signup"];
 
 /**
- * Middleware to protect routes
+ * Proxy to protect routes
  * Protects all /app/* routes - checks for session cookie
  * Full validation happens in server components
  */
-export async function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Allow public routes
@@ -35,7 +35,7 @@ export async function middleware(request: NextRequest) {
   return NextResponse.next();
 }
 
-// Configure which routes use middleware
+// Configure which routes use proxy
 export const config = {
   matcher: [
     /*

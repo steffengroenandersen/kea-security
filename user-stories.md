@@ -10,10 +10,10 @@
 | US004 | Create Business                           | ✅ DONE |
 | US005 | Assign Users to Business                  | ✅ DONE |
 | US006 | Upload Business Logo                      | 📋 TODO |
-| US007 | Create Portfolio                          | 📋 TODO |
+| US007 | Create Portfolio                          | ✅ DONE |
 | US008 | Toggle Portfolio Visibility               | 📋 TODO |
-| US009 | View All Portfolios (Admin)               | 📋 TODO |
-| US010 | View Visible Portfolios (Business Member) | 📋 TODO |
+| US009 | View All Portfolios (Admin)               | ✅ DONE |
+| US010 | View Visible Portfolios (Business Member) | ✅ DONE |
 | US011 | View My Businesses                        | 📋 TODO |
 | US012 | Add Comment to Portfolio                  | 📋 TODO |
 | US013 | View Portfolio Comments                   | 📋 TODO |
@@ -129,10 +129,10 @@
 
 **Acceptance Criteria:**
 
-- Admin can create portfolio with title
-- Portfolio is set to hidden by default
-- Portfolio is associated with the business
-- Portfolio appears in admin's portfolio list
+- ✅ Admin can create portfolio with title
+- ✅ Portfolio is set to hidden by default
+- ✅ Portfolio is associated with the business
+- ✅ Portfolio appears in admin's portfolio list
 
 ---
 
@@ -160,10 +160,10 @@
 
 **Acceptance Criteria:**
 
-- Admin sees both visible and hidden portfolios
-- List shows portfolio title and visibility status
-- Admin can filter/sort portfolios
-- Each portfolio shows its current visibility state (visible/hidden)
+- ✅ Admin sees both visible and hidden portfolios
+- ✅ List shows portfolio title and visibility status
+- ⚠️ Admin can filter/sort portfolios _(sorting by title implemented, filtering not yet)_
+- ✅ Each portfolio shows its current visibility state (visible/hidden)
 
 ---
 
@@ -175,11 +175,11 @@
 
 **Acceptance Criteria:**
 
-- User only sees portfolios marked as visible
-- Hidden portfolios are completely hidden from view
-- List shows portfolio title and business name
-- User cannot see visibility toggle controls
-- User can only see portfolios for businesses they're assigned to
+- ✅ User only sees portfolios marked as visible
+- ✅ Hidden portfolios are completely hidden from view
+- ✅ List shows portfolio title and business name
+- ✅ User cannot see visibility toggle controls
+- ✅ User can only see portfolios for businesses they're assigned to
 
 ---
 
