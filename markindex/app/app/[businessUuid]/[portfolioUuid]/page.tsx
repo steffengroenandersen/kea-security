@@ -1,6 +1,7 @@
 import { redirect, notFound } from "next/navigation";
 import { getSessionToken, validateSessionToken } from "@/lib/auth";
 import { getUserBusinessAccess } from "@/lib/auth/business";
+import { getPortfolioComments } from "@/lib/actions/business";
 import { db } from "@/lib/db";
 import { portfolio } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
@@ -14,6 +15,8 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
+import { CommentForm } from "@/components/business/CommentForm";
+import { CommentList } from "@/components/business/CommentList";
 
 interface PortfolioPageProps {
   params: Promise<{
@@ -80,6 +83,9 @@ export default async function PortfolioPage({ params }: PortfolioPageProps) {
     notFound();
   }
 
+  // 6. Fetch comments (US013)
+  const comments = await getPortfolioComments(portfolioData.portfolioId);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-zinc-50 to-zinc-100 dark:from-zinc-950 dark:to-black p-4">
       <div className="max-w-4xl mx-auto py-8">
@@ -140,23 +146,14 @@ export default async function PortfolioPage({ params }: PortfolioPageProps) {
             </CardContent>
           </Card>
 
-          {/* Future features placeholder */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Coming Soon</CardTitle>
-              <CardDescription>
-                Additional portfolio features in development
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ul className="list-disc list-inside space-y-1 text-zinc-600 dark:text-zinc-400">
-                <li>Portfolio content/description (future enhancement)</li>
-                <li>Comments section (US012, US013)</li>
-                {isAdmin && <li>Edit portfolio details (future enhancement)</li>}
-                {isAdmin && <li>Toggle visibility (US008)</li>}
-              </ul>
-            </CardContent>
-          </Card>
+          {/* Comments Section (US012, US013) */}
+          <CommentList comments={comments} />
+
+          {/* Add Comment Form (US012) */}
+          <CommentForm
+            portfolioUuid={portfolioUuid}
+            businessUuid={businessUuid}
+          />
         </div>
       </div>
     </div>

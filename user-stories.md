@@ -14,9 +14,9 @@
 | US008 | Toggle Portfolio Visibility               | ✅ DONE |
 | US009 | View All Portfolios (Admin)               | ✅ DONE |
 | US010 | View Visible Portfolios (Business Member) | ✅ DONE |
-| US011 | View My Businesses                        | 📋 TODO |
-| US012 | Add Comment to Portfolio                  | 📋 TODO |
-| US013 | View Portfolio Comments                   | 📋 TODO |
+| US011 | View My Businesses                        | ✅ DONE |
+| US012 | Add Comment to Portfolio                  | ✅ DONE |
+| US013 | View Portfolio Comments                   | ✅ DONE |
 
 ---
 
@@ -208,11 +208,11 @@
 
 **Acceptance Criteria:**
 
-- User can add comment to any visible portfolio in their assigned businesses
-- Comment content is validated and sanitized (XSS prevention)
-- Comment displays username and timestamp
-- Comment appears immediately after submission
-- Empty comments are rejected
+- ✅ User can add comment to any visible portfolio in their assigned businesses
+- ✅ Comment content is validated and sanitized (XSS prevention)
+- ✅ Comment displays username and timestamp
+- ✅ Comment appears immediately after submission
+- ✅ Empty comments are rejected
 
 ---
 
@@ -224,7 +224,7 @@
 
 **Acceptance Criteria:**
 
-- Comments displayed in chronological order
-- Each comment shows author name and timestamp
-- User can see all comments on portfolios they have access to
-- Comment count is visible on portfolio list
+- ✅ Comments displayed in chronological order
+- ✅ Each comment shows author name and timestamp
+- ✅ User can see all comments on portfolios they have access to
+- 📋 Comment count is visible on portfolio list _(future enhancement)_
