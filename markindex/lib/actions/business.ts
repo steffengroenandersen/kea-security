@@ -304,3 +304,80 @@ export async function getBusinessPortfolios(businessId: number) {
 
   return portfolios;
 }
+
+/**
+ * Toggle portfolio visibility action (US008)
+ * Only business admins can toggle visibility
+ * Toggles between 'visible' and 'hidden'
+ */
+export async function togglePortfolioVisibility(
+  portfolioUuid: string,
+  businessUuid: string
+) {
+  try {
+    // 1. Authenticate
+    const token = await getSessionToken();
+    if (!token) {
+      return { error: "Unauthorized" };
+    }
+
+    const { user: currentUser } = await validateSessionToken(token);
+    if (!currentUser) {
+      return { error: "Unauthorized" };
+    }
+
+    // 2. Authorize - verify current user is admin of this business
+    const businessAccess = await getUserBusinessAccess(
+      currentUser.userId,
+      businessUuid
+    );
+    if (!businessAccess) {
+      return { error: "Something went wrong" };
+    }
+
+    if (businessAccess.role !== "admin") {
+      return { error: "Something went wrong" };
+    }
+
+    // 3. Get current portfolio to verify it belongs to this business
+    const portfolioResult = await db
+      .select({
+        portfolioId: portfolio.portfolioId,
+        visibility: portfolio.visibility,
+      })
+      .from(portfolio)
+      .where(
+        and(
+          eq(portfolio.portfolioUuid, portfolioUuid),
+          eq(portfolio.businessId, businessAccess.businessId)
+        )
+      )
+      .limit(1);
+
+    if (portfolioResult.length === 0) {
+      return { error: "Something went wrong" };
+    }
+
+    const currentPortfolio = portfolioResult[0];
+
+    // 4. Toggle visibility
+    const newVisibility =
+      currentPortfolio.visibility === "visible" ? "hidden" : "visible";
+
+    await db
+      .update(portfolio)
+      .set({ visibility: newVisibility })
+      .where(eq(portfolio.portfolioUuid, portfolioUuid));
+
+    // 5. Revalidate the page to show updated visibility
+    revalidatePath(`/app/${businessUuid}`);
+    return { success: true };
+  } catch (error) {
+    // Catch redirect errors and rethrow them
+    if (error instanceof Error && error.message === "NEXT_REDIRECT") {
+      throw error;
+    }
+    // Return generic error for all other failures
+    return { error: "Something went wrong" };
+  }
+}

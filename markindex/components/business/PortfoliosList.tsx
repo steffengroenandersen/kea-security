@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import {
   Card,
   CardContent,
@@ -6,7 +9,9 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { togglePortfolioVisibility } from "@/lib/actions/business";
 
 interface Portfolio {
   portfolioId: number;
@@ -23,6 +28,22 @@ interface PortfoliosListProps {
 }
 
 export function PortfoliosList({ portfolios, isAdmin, businessUuid }: PortfoliosListProps) {
+  const [togglingId, setTogglingId] = useState<number | null>(null);
+
+  const handleToggleVisibility = async (portfolioUuid: string, portfolioId: number) => {
+    setTogglingId(portfolioId);
+    try {
+      const result = await togglePortfolioVisibility(portfolioUuid, businessUuid);
+      if (result.error) {
+        alert(result.error);
+      }
+    } catch (error) {
+      alert("Failed to toggle visibility");
+    } finally {
+      setTogglingId(null);
+    }
+  };
+
   if (portfolios.length === 0) {
     return (
       <Card>
@@ -51,24 +72,36 @@ export function PortfoliosList({ portfolios, isAdmin, businessUuid }: Portfolios
       <CardContent>
         <div className="space-y-2">
           {portfolios.map((portfolio) => (
-            <Link
+            <div
               key={portfolio.portfolioId}
-              href={`/app/${businessUuid}/${portfolio.portfolioUuid}`}
-              className="flex items-center justify-between p-3 border rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors cursor-pointer block"
+              className="flex items-center justify-between p-3 border rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors"
             >
-              <div className="flex-1">
-                <h3 className="font-medium">{portfolio.title}</h3>
-              </div>
+              <Link
+                href={`/app/${businessUuid}/${portfolio.portfolioUuid}`}
+                className="flex-1"
+              >
+                <h3 className="font-medium hover:underline">{portfolio.title}</h3>
+              </Link>
               {isAdmin && (
-                <Badge
-                  variant={
-                    portfolio.visibility === "visible" ? "default" : "secondary"
-                  }
-                >
-                  {portfolio.visibility === "visible" ? "Visible" : "Hidden"}
-                </Badge>
+                <div className="flex items-center gap-2">
+                  <Badge
+                    variant={
+                      portfolio.visibility === "visible" ? "default" : "secondary"
+                    }
+                  >
+                    {portfolio.visibility === "visible" ? "Visible" : "Hidden"}
+                  </Badge>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => handleToggleVisibility(portfolio.portfolioUuid, portfolio.portfolioId)}
+                    disabled={togglingId === portfolio.portfolioId}
+                  >
+                    {togglingId === portfolio.portfolioId ? "..." : "Toggle"}
+                  </Button>
+                </div>
               )}
-            </Link>
+            </div>
           ))}
         </div>
       </CardContent>

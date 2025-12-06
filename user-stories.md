@@ -11,7 +11,7 @@
 | US005 | Assign Users to Business                  | ✅ DONE |
 | US006 | Upload Business Logo                      | 📋 TODO |
 | US007 | Create Portfolio                          | ✅ DONE |
-| US008 | Toggle Portfolio Visibility               | 📋 TODO |
+| US008 | Toggle Portfolio Visibility               | ✅ DONE |
 | US009 | View All Portfolios (Admin)               | ✅ DONE |
 | US010 | View Visible Portfolios (Business Member) | ✅ DONE |
 | US011 | View My Businesses                        | 📋 TODO |
