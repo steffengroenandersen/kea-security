@@ -1,6 +1,6 @@
 import { redirect, notFound } from "next/navigation";
 import { getSessionToken, validateSessionToken } from "@/lib/auth";
-import { getUserBusinessAccess } from "@/lib/auth/business";
+import { getUserBusinessAccess, getBusinessUsers } from "@/lib/auth/business";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -10,6 +10,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import Link from "next/link";
+import { AssignUserForm } from "@/components/business/AssignUserForm";
+import { BusinessUsersList } from "@/components/business/BusinessUsersList";
 
 interface BusinessPageProps {
   params: Promise<{
@@ -42,6 +44,10 @@ export default async function BusinessPage({ params }: BusinessPageProps) {
     // User doesn't have access to this business
     notFound(); // Shows 404 instead of revealing existence
   }
+
+  // 3. Fetch business users
+  const users = await getBusinessUsers(businessAccess.businessId);
+  const isAdmin = businessAccess.role === "admin";
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-zinc-50 to-zinc-100 dark:from-zinc-950 dark:to-black p-4">
@@ -80,25 +86,30 @@ export default async function BusinessPage({ params }: BusinessPageProps) {
         </div>
 
         {/* Content Area */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Business Dashboard</CardTitle>
-            <CardDescription>
-              Manage portfolios and team members
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-zinc-600 dark:text-zinc-400">
-              This is the business detail page. Future features will include:
-            </p>
-            <ul className="list-disc list-inside mt-2 space-y-1 text-zinc-600 dark:text-zinc-400">
-              <li>Portfolio management (US007, US008, US009, US010)</li>
-              <li>Team member management (US005)</li>
-              <li>Logo upload (US006)</li>
-              <li>Comments on portfolios (US012, US013)</li>
-            </ul>
-          </CardContent>
-        </Card>
+        <div className="space-y-6">
+          {/* Show assign form only to admins */}
+          {isAdmin && <AssignUserForm businessUuid={businessUuid} />}
+
+          {/* Show user list to everyone */}
+          <BusinessUsersList users={users} />
+
+          {/* Future features placeholder */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Coming Soon</CardTitle>
+              <CardDescription>
+                Additional features in development
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ul className="list-disc list-inside space-y-1 text-zinc-600 dark:text-zinc-400">
+                <li>Portfolio management (US007, US008, US009, US010)</li>
+                <li>Logo upload (US006)</li>
+                <li>Comments on portfolios (US012, US013)</li>
+              </ul>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );

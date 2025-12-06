@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { business, userBusiness } from "@/lib/db/schema";
+import { business, userBusiness, user } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
 
 /**
@@ -46,4 +46,24 @@ export async function isBusinessAdmin(
 ): Promise<boolean> {
   const access = await getUserBusinessAccess(userId, businessUuid);
   return access?.role === "admin";
+}
+
+/**
+ * Get all users assigned to a business with their roles
+ * @param businessId - The business ID (internal)
+ * @returns Array of users with email and role
+ */
+export async function getBusinessUsers(businessId: number) {
+  const users = await db
+    .select({
+      userId: user.userId,
+      email: user.email,
+      role: userBusiness.role,
+    })
+    .from(userBusiness)
+    .innerJoin(user, eq(userBusiness.userId, user.userId))
+    .where(eq(userBusiness.businessId, businessId))
+    .orderBy(user.email);
+
+  return users;
 }
