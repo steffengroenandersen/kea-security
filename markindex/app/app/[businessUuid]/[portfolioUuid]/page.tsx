@@ -6,13 +6,7 @@ import { db } from "@/lib/db";
 import { portfolio } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { CommentForm } from "@/components/business/CommentForm";
@@ -41,10 +35,7 @@ export default async function PortfolioPage({ params }: PortfolioPageProps) {
   }
 
   // 2. Authorization - check business access
-  const businessAccess = await getUserBusinessAccess(
-    user.userId,
-    businessUuid
-  );
+  const businessAccess = await getUserBusinessAccess(user.userId, businessUuid);
 
   if (!businessAccess) {
     // User doesn't have access to this business
@@ -87,7 +78,7 @@ export default async function PortfolioPage({ params }: PortfolioPageProps) {
   const comments = await getPortfolioComments(portfolioData.portfolioId);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-zinc-50 to-zinc-100 dark:from-zinc-950 dark:to-black p-4">
+    <div className="min-h-screen bg-linear-to-br from-zinc-50 to-zinc-100 dark:from-zinc-950 dark:to-black p-4">
       <div className="max-w-4xl mx-auto py-8">
         {/* Header */}
         <div className="mb-8">
@@ -101,16 +92,12 @@ export default async function PortfolioPage({ params }: PortfolioPageProps) {
               <div className="flex items-center gap-3">
                 <h1 className="text-3xl font-bold">{portfolioData.title}</h1>
                 {isAdmin && (
-                  <Badge
-                    variant={isVisible ? "default" : "secondary"}
-                  >
+                  <Badge variant={isVisible ? "default" : "secondary"}>
                     {isVisible ? "Visible" : "Hidden"}
                   </Badge>
                 )}
               </div>
-              <p className="text-zinc-600 dark:text-zinc-400 mt-1">
-                Business: {businessAccess.name}
-              </p>
+              <p className="text-zinc-600 dark:text-zinc-400 mt-1">Business: {businessAccess.name}</p>
             </div>
           </div>
         </div>
@@ -121,25 +108,21 @@ export default async function PortfolioPage({ params }: PortfolioPageProps) {
             <CardHeader>
               <CardTitle>Portfolio Details</CardTitle>
               <CardDescription>
-                {isAdmin
-                  ? "Portfolio information and content"
-                  : "View portfolio content"}
+                {isAdmin ? "Portfolio information and content" : "View portfolio content"}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 <div>
-                  <p className="text-sm text-zinc-600 dark:text-zinc-400">
-                    Portfolio UUID
-                  </p>
+                  <p className="text-sm text-zinc-600 dark:text-zinc-400">Portfolio UUID</p>
                   <p className="font-mono text-sm">{portfolioData.portfolioUuid}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-zinc-600 dark:text-zinc-400">
-                    Visibility Status
-                  </p>
+                  <p className="text-sm text-zinc-600 dark:text-zinc-400">Visibility Status</p>
                   <p className="font-medium">
-                    {portfolioData.visibility === "visible" ? "Visible to all business members" : "Hidden (admins only)"}
+                    {portfolioData.visibility === "visible"
+                      ? "Visible to all business members"
+                      : "Hidden (admins only)"}
                   </p>
                 </div>
               </div>
@@ -150,10 +133,7 @@ export default async function PortfolioPage({ params }: PortfolioPageProps) {
           <CommentList comments={comments} />
 
           {/* Add Comment Form (US012) */}
-          <CommentForm
-            portfolioUuid={portfolioUuid}
-            businessUuid={businessUuid}
-          />
+          <CommentForm portfolioUuid={portfolioUuid} businessUuid={businessUuid} />
         </div>
       </div>
     </div>

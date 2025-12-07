@@ -3,13 +3,7 @@ import { getSessionToken, validateSessionToken } from "@/lib/auth";
 import { getUserBusinesses } from "@/lib/actions/business";
 import { logout } from "@/lib/actions/auth";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { BusinessCard } from "@/components/business/BusinessCard";
 import { CreateBusinessForm } from "@/components/business/CreateBusinessForm";
 
@@ -29,15 +23,13 @@ export default async function BusinessManagerPage() {
   const businesses = await getUserBusinesses(user.userId);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-zinc-50 to-zinc-100 dark:from-zinc-950 dark:to-black p-4">
+    <div className="min-h-screen bg-linear-to-br from-zinc-50 to-zinc-100 dark:from-zinc-950 dark:to-black p-4">
       <div className="max-w-6xl mx-auto py-8">
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-3xl font-bold">Business Manager</h1>
-            <p className="text-zinc-600 dark:text-zinc-400 mt-1">
-              Logged in as {user.email}
-            </p>
+            <p className="text-zinc-600 dark:text-zinc-400 mt-1">Logged in as {user.email}</p>
           </div>
           <form action={logout}>
             <Button variant="outline">Log Out</Button>
